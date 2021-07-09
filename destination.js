@@ -89,11 +89,33 @@ const getMetafields = async () => {
     );
   return Promise.all(inserts);
 };
-
+const deleteMetafields = async () => {
+  const products = await Product.findAll();
+  const mapped = products.map((product) => {
+    return shopify.metafield.list({
+      metafield: {
+        owner_resource: "product",
+        owner_id: product.destination_id,
+      },
+    });
+  });
+  let count = mapped.length;
+  shopify.on("callLimits", () => console.log(--count));
+  const results = await Promise.all(mapped);
+  const mapped2 = results
+    .filter((item) => item.length)
+    .reduce((a, i) => a.concat(i))
+    .map((field) => {
+      return shopify.metafield.delete(field.id);
+    });
+  let count2 = mapped2.length;
+  shopify.on("callLimits", () => console.log(--count2));
+  return Promise.all(mapped2);
+};
 (async () => {
   try {
     await db.sequelize.sync();
-    await getMetafields();
+    await deleteMetafields();
     // await addProducts();
   } catch (error) {
     console.log(error);
