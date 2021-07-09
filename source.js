@@ -37,6 +37,10 @@ const addProducts = async () => {
     source_id: product.id,
     handle: product.handle,
   }));
+  const count = await Product.count();
+  if (count) {
+    throw new Error("Product table has records.");
+  }
   return Product.bulkCreate(mapped);
 };
 

@@ -71,6 +71,10 @@ const getMetafields = async () => {
   shopify.on("callLimits", () => console.log(--count));
   const results = await Promise.all(mapped);
   console.log(results);
+  const counter = await Field.count();
+  if (counter) {
+    throw new Error("Field table has records.");
+  }
   const inserts = results
     .filter((item) => item.length)
     .reduce((a, i) => a.concat(i))
