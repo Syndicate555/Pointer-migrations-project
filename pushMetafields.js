@@ -29,28 +29,33 @@ const pushMetafields = async () => {
   });
 
   const mapped = fields.map((product) => {
-    return shopify.metafield
-      .create({
-        key: product.key,
-        value: product.value,
-        value_type: product.value_type,
-        namespace: product.namespace,
-        owner_resource: "product",
-        owner_id: product.Product.source_id,
-      })
-      .catch((error) => {
-        if (
-          error.response &&
-          error.response.body &&
-          error.response.body.errors
-        ) {
-          product.error = JSON.stringify(error.response.body.errors);
-          product.save();
-        } else {
-          product.error = JSON.stringify([{ message: error.message }]);
-          product.save();
-        }
-      });
+    return (
+      shopify.metafield
+        .create({
+          key: product.key,
+          value: product.value,
+          value_type: product.value_type,
+          namespace: product.namespace,
+          owner_resource: "product",
+          owner_id: product.Product.source_id,
+        })
+        //   .then((a) => {
+        //     throw new Error("not working");
+        //   })
+
+        .catch((error) => {
+          if (
+            error.response &&
+            error.response.body &&
+            error.response.body.errors
+          ) {
+            product.error = JSON.stringify(error.response.body.errors);
+          } else {
+            product.error = JSON.stringify([{ message: error.message }]);
+          }
+          return product.save();
+        })
+    );
   });
   return Promise.all(mapped);
 };
